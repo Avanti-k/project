@@ -1,0 +1,11 @@
+[Unit]
+Description=content distribution client
+After=network.target
+
+[Service]
+ExecStart=/home/tirtha/ideate/content_dist/content_dist/App1_1-1.py
+Type=forking
+PIDFile=/home/tirtha/ideate/content_dist/content_dist/App1_1-1.pid
+
+[Install]
+WantedBy=multi-user.target

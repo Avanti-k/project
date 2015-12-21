@@ -1,0 +1,144 @@
+#***************service server*********************#
+# REMAINING 1)decryption of too large msg 
+from bottle import route, run, request
+from bottle import get, run
+import bottle
+from bottle import error
+from bottle import static_file
+import mysql.connector
+import pymongo
+import cgi
+import re
+import datetime
+import random
+import hmac
+import user
+import sys
+import os,json
+from Crypto.PublicKey import RSA
+from Crypto import Random
+import base64
+from ast import literal_eval
+i=0
+random_num1=Random.new().read
+keys1=RSA.generate(1024,random_num1)
+public_key1=keys1.publickey()
+
+@bottle.post('/newNode')
+def insert_entry():
+	postdata = request.body.read()
+   	print postdata #this goes to log file only, not to client
+    	name,location=postdata.split("=",1)
+    	pwd="pwd"+name+location
+
+	#encryption
+    	file=open("../edgeDevice/admin/keys_client.txt","r")
+	public_str=file.read()
+	file.close()
+
+	#creating server keys
+	#random_num1=Random.new().read
+	#keys1=RSA.generate(1024,random_num1)
+	#public_key1=keys1.publickey()
+	file=open("keys_server.txt","w+")
+	file.write(public_key1.exportKey())
+	file.close()
+	
+	#entering into db
+    	cnx=mysql.connector.connect(user="ideate",password='password',database='one')
+    	cursor=cnx.cursor()
+    	try:
+        	add_entry=("INSERT INTO data (name,location,pwd) VALUES (%s,%s,%s)")
+		entry_data=(name,location,pwd)
+		print "checking2"
+		print name
+		print location	
+		print pwd
+		cursor.execute(add_entry,entry_data)
+		cursor.execute("select uid from data where pwd='"+pwd+"'")
+		uid=cursor.fetchone()
+		print uid[0]
+		cnx.commit()
+		cursor.close()
+		cnx.close()
+		# concat uid to enc_pwd
+	
+		string={"uid":uid[0],"pwd":pwd}
+		print string
+		
+		jdata=json.dumps(string)
+		
+		public_key=RSA.importKey(public_str)
+		enc_data=public_key.encrypt(jdata, 32)
+		
+    		return enc_data
+		
+		
+    	except:
+        	print ("Error inserting post")
+		return "Invalid"
+
+
+
+@bottle.post('/login') 
+def do_login(): 
+	
+	
+	#creating server keys
+	
+
+	#reading encrypted data from client 
+	postdata=request.body.read()
+	uid,enc_pwd=postdata.split("=",1)
+	print enc_pwd
+	print uid
+	#decrypting pwd
+	pwd=keys1.decrypt(literal_eval(enc_pwd))
+	print pwd
+	print uid+" "+pwd
+	cnx=mysql.connector.connect(user="ideate",password='password',database='one')
+    	cursor=cnx.cursor()
+	cursor.execute("select uid,pwd from data where uid="+uid+" and pwd='"+pwd+"'")
+	result=cursor.fetchone()
+	if result : 
+		return "1" 
+	else: 
+		return "0"
+@bottle.post('/getPolicy')
+def give_policy():
+	postdata=request.body.read()
+	uid,pwd=postdata.split("=",1)
+	filename=uid+"_policy.txt"
+	if os.path.isfile(filename): 
+		policy_server=open(filename, "r")		
+		line=policy_server.read()
+		json_line = json.loads(line)
+		jdata = json.dumps({"t":json_line['t']})
+		policy_server.close()	
+		return jdata
+			
+	else:
+		policy_server=open(filename,"w")
+		policy_server.write('{"t":"24"}')
+		policy_server.close()
+		jdata = json.dumps({"t":"24"})
+		print jdata
+		return jdata
+
+@bottle.post('/getApps')
+def give_policy():
+	postdata=request.body.read()
+	uid,pwd=postdata.split("=",1)
+	filename=uid+"_apps.txt"
+	if os.path.isfile(filename): 
+		policy_server=open(filename, "r")		
+		line=policy_server.read()
+		json_line = json.loads(line)
+		jdata = json.dumps({"appid":json_line['appid'],"server_loc":json_line['server_loc']})
+		policy_server.close()	
+		return jdata
+			
+	else:
+		return "0"
+
+run(host='localhost', port=8080, debug=True)

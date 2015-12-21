@@ -1,0 +1,11 @@
+[Unit]
+Description=service for administration of the edge device
+After=network.target
+
+[Service]
+ExecStart=/home/tirtha/ideate/content_dist/admin/admin.py
+Type=forking
+PIDFile=/home/tirtha/ideate/content_dist/admin/admin.pid
+
+[Install]
+WantedBy=multi-user.target
