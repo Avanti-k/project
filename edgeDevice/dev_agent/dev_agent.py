@@ -22,8 +22,8 @@ from subprocess import Popen, check_output
 class Admin():
 
 	t=0	# time to get new policy
-	uid=""	#extract from auth.txt, get from server
-	pwd=""	#extract from auth.txt, get from server
+	uid="148"	#extract from auth.txt, get from server
+	pwd="148p"	#extract from auth.txt, get from server
 	apps=[]	#list of apps, appid:serverip
 	ip=""	#extract from server.txt
 	app_handle=[]	#just in case
@@ -80,6 +80,7 @@ class Admin():
 		json_obj = json.loads(line)
 		print(json_obj['t'])
 		#why notst['t']
+		print "...................OUT GETPOLICY........................."
 
 	def getApps(self):
 		print "...................IN GETAPPS................................"
@@ -139,8 +140,9 @@ class Admin():
 			print response.status, response.reason
 			s1=response.read()
 			print s1 
-
+			print "------------------OUT LOGIN-------"
 			if(s1=="1"):
+				print "LOGIN SUCCESSFUl"
 				return 1
 			else :
 				return 0
@@ -159,7 +161,7 @@ class Admin():
 			name=self.uname.strip()
 			print name
 			location= self.loc.strip()
-			
+			print location
 			params = urllib.urlencode({name: location})
 			headers = {"Content-type": "appication/x-www-form-urlencoded", "Accept": "text/plain"}
 			conn = httplib.HTTPConnection("localhost", 8080)
@@ -208,7 +210,7 @@ class Admin():
 
 		self.getPolicy()
 		apps=self.getApps()
-		self.startApp()
+		self.startApp(apps)
 		pid=fork()
 		if pid==0:
 			while True:
