@@ -23,16 +23,19 @@ i=0
 random_num1=Random.new().read
 keys1=RSA.generate(1024,random_num1)
 public_key1=keys1.publickey()
+file=open("keys_server.txt","w+")
+file.write(public_key1.exportKey())
+file.close()
 
 @bottle.post('/newNode')
 def insert_entry():
 	postdata = request.body.read()
-   	print postdata #this goes to log file only, not to client
+   	#print postdata #this goes to log file only, not to client
     	name,location=postdata.split("=",1)
     	pwd="pwd"+name+location
 
 	#encryption
-    	file=open("../edgeDevice/admin/keys_client.txt","r")
+    	file=open("../edgeDevice/dev_agent/keys_client.txt","r")
 	public_str=file.read()
 	file.close()
 
@@ -40,9 +43,9 @@ def insert_entry():
 	#random_num1=Random.new().read
 	#keys1=RSA.generate(1024,random_num1)
 	#public_key1=keys1.publickey()
-	file=open("keys_server.txt","w+")
-	file.write(public_key1.exportKey())
-	file.close()
+	#file=open("keys_server.txt","w+")
+	#file.write(public_key1.exportKey())
+	#file.close()
 	
 	#entering into db
     	cnx=mysql.connector.connect(user="ideate",password='password',database='one')
@@ -70,7 +73,7 @@ def insert_entry():
 		
 		public_key=RSA.importKey(public_str)
 		enc_data=public_key.encrypt(jdata, 32)
-		
+		print enc_data
     		return enc_data
 		
 		
@@ -82,32 +85,42 @@ def insert_entry():
 
 @bottle.post('/login') 
 def do_login(): 
-	
+	print "-------IN DO_LOGIN-----------"
 	
 	#creating server keys
 	
 
 	#reading encrypted data from client 
 	postdata=request.body.read()
-	uid,enc_pwd=postdata.split("=",1)
-	print enc_pwd
-	print uid
+	enc_pwd="ass"
+	uid="132"
+	#uid,enc_pwd=postdata.split("=",1)
+	print postdata
 	#decrypting pwd
-	pwd=keys1.decrypt(literal_eval(enc_pwd))
+	#pwd=keys1.decrypt(literal_eval(enc_pwd))
+	#pwd=keys1.decrypt(enc_pwd)
+	print "dec_pwd "
+	pwd="pwdcoco2pune7"
 	print pwd
 	print uid+" "+pwd
 	cnx=mysql.connector.connect(user="ideate",password='password',database='one')
     	cursor=cnx.cursor()
 	cursor.execute("select uid,pwd from data where uid="+uid+" and pwd='"+pwd+"'")
 	result=cursor.fetchone()
+	print "result"
+	print result
 	if result : 
 		return "1" 
 	else: 
 		return "0"
 @bottle.post('/getPolicy')
 def give_policy():
+	print "-------IN GIVE_POLICY-----------"
 	postdata=request.body.read()
-	uid,pwd=postdata.split("=",1)
+	print "postdata"
+	print postdata
+	uid="123"
+	#uid,pwd=postdata.split("=",1)
 	filename=uid+"_policy.txt"
 	if os.path.isfile(filename): 
 		policy_server=open(filename, "r")		
@@ -126,10 +139,16 @@ def give_policy():
 		return jdata
 
 @bottle.post('/getApps')
-def give_policy():
+def give_apps():
+	print "-------IN GIVE_APPS-----------"
 	postdata=request.body.read()
-	uid,pwd=postdata.split("=",1)
-	filename=uid+"_apps.txt"
+	#uid,pwd=postdata.split("=",1)
+	uid="123"
+	print "printing postdata"
+	print postdata
+	#ava- when adn where is this file getting created
+	#filename=uid+"_apps.txt"
+	filename="client1_apps.txt"
 	if os.path.isfile(filename): 
 		policy_server=open(filename, "r")		
 		line=policy_server.read()

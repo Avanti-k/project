@@ -1,2 +1,2 @@
-uname:coco
-loc:mum
+uname:coco2
+loc:pune7
