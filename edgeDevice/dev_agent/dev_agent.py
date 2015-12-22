@@ -13,7 +13,7 @@ from os import fork
 from time import sleep
 import httplib, urllib
 from os import path
-
+import json
 from Crypto.PublicKey import RSA
 from Crypto import Random
 from subprocess import Popen, check_output
@@ -64,11 +64,12 @@ class Admin():
 	def getPolicy(self):
 		print "...................IN GETPOLICY........................."
 		params = urllib.urlencode({self.uid: self.pwd})
+		print params
 		headers = {"Content-type": "appication/x-www-form-urlencoded", "Accept": "text/plain"}
-		conn = httplib.HTTPConnection(self.ip, 8080)
+		conn = httplib.HTTPConnection("localhost", 8080)
 		conn.request("POST","/getPolicy",params ,headers)
 		response=conn.getresponse()
-		
+		print "...................AFTER TAKING RESPONCE........................."
 		print response.status, response.reason
 		st=response.read()
 		policy=open("policy.txt", "w")
@@ -84,7 +85,7 @@ class Admin():
 		print "...................IN GETAPPS................................"
 		params = urllib.urlencode({self.uid: self.pwd})
 		headers = {"Content-type": "appication/x-www-form-urlencoded", "Accept": "text/plain"}
-		conn = httplib.HTTPConnection(self.ip, 8080)
+		conn = httplib.HTTPConnection("localhost", 8080)
 		conn.request("POST","/getApps",params ,headers)
 		response=conn.getresponse()
 			
@@ -112,9 +113,15 @@ class Admin():
 			#line=auth.read()	
 			#self.uid=line['uid']
 			#self.pwd=line['pwd']
-			self.uid=120
-			self.pwd="pwdcocomum"
 			
+
+
+			#self.uid=120
+			#self.pwd="pwdcocomum"
+					
+
+
+
 			# add encryption to send pwd to server
 			file=open("../../serviceServer/keys_server.txt","r")
 			public_str=file.read()
@@ -123,6 +130,7 @@ class Admin():
 			enc_data=public_key.encrypt(self.pwd, 32)
 
 			params = urllib.urlencode({self.uid:enc_data})
+			print params
 			headers = {"Content-type": "appication/x-www-form-urlencoded", "Accept": "text/plain"}
 			conn = httplib.HTTPConnection(self.ip, 8080)
 			conn.request("POST","/login",params ,headers)
@@ -138,7 +146,7 @@ class Admin():
 				return 0
 		else:
 		#registration
-
+			print ".......................IN REG.........................."
 			random_num=Random.new().read
 			keys=RSA.generate(1024,random_num)
 			public_key=keys.publickey()
@@ -168,9 +176,16 @@ class Admin():
 				return 0
 			print dec_data
 			json_obj=json.loads(dec_data)
+			
 			with open("auth.txt", "w") as auth:
 				json.dump(json_obj,auth)
 			auth.close()
+			
+			self.uid=json_obj['uid']
+			self.pwd=json_obj['pwd']
+			
+			print "self.pwd: "+self.pwd
+			print self.uid	
 			return 1
 	def startApp(self):
 		# download appid.service file in correct location

@@ -23,7 +23,9 @@ i=0
 random_num1=Random.new().read
 keys1=RSA.generate(1024,random_num1)
 public_key1=keys1.publickey()
-
+file=open("keys_server.txt","w+")
+file.write(public_key1.exportKey())
+file.close()
 @bottle.post('/newNode')
 def insert_entry():
 	postdata = request.body.read()
@@ -32,17 +34,17 @@ def insert_entry():
     	pwd="pwd"+name+location
 
 	#encryption
-    	file=open("../edgeDevice/admin/keys_client.txt","r")
+    	file=open("../edgeDevice/dev_agent/keys_client.txt","r")
 	public_str=file.read()
 	file.close()
-
+	print "hello"
 	#creating server keys
 	#random_num1=Random.new().read
 	#keys1=RSA.generate(1024,random_num1)
 	#public_key1=keys1.publickey()
-	file=open("keys_server.txt","w+")
-	file.write(public_key1.exportKey())
-	file.close()
+	#file=open("keys_server.txt","w+")
+	#file.write(public_key1.exportKey())
+	#file.close()
 	
 	#entering into db
     	cnx=mysql.connector.connect(user="ideate",password='password',database='one')
@@ -62,8 +64,8 @@ def insert_entry():
 		cursor.close()
 		cnx.close()
 		# concat uid to enc_pwd
-	
-		string={"uid":uid[0],"pwd":pwd}
+		uid=str(uid[0])
+		string={"uid":uid,"pwd":pwd}
 		print string
 		
 		jdata=json.dumps(string)
@@ -86,9 +88,10 @@ def do_login():
 	
 	#creating server keys
 	
-
+	print "in login"
 	#reading encrypted data from client 
 	postdata=request.body.read()
+	print "postdata: "+postdata
 	uid,enc_pwd=postdata.split("=",1)
 	print enc_pwd
 	print uid
@@ -106,7 +109,9 @@ def do_login():
 		return "0"
 @bottle.post('/getPolicy')
 def give_policy():
+	print "...................IN GETPOLICY........................."
 	postdata=request.body.read()
+	print "postdata:"+postdata
 	uid,pwd=postdata.split("=",1)
 	filename=uid+"_policy.txt"
 	if os.path.isfile(filename): 
@@ -126,10 +131,10 @@ def give_policy():
 		return jdata
 
 @bottle.post('/getApps')
-def give_policy():
+def give_Apps():
 	postdata=request.body.read()
 	uid,pwd=postdata.split("=",1)
-	filename=uid+"_apps.txt"
+	filename="client1_apps.txt"
 	if os.path.isfile(filename): 
 		policy_server=open(filename, "r")		
 		line=policy_server.read()
