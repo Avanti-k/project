@@ -64,8 +64,8 @@ def insert_entry():
 		cursor.close()
 		cnx.close()
 		# concat uid to enc_pwd
-	
-		string={"uid":uid[0],"pwd":pwd}
+		uid=str(uid[0])
+		string={"uid":uid,"pwd":pwd}
 		print string
 		
 		jdata=json.dumps(string)

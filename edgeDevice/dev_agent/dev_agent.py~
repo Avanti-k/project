@@ -63,18 +63,10 @@ class Admin():
 
 	def getPolicy(self):
 		print "...................IN GETPOLICY........................."
-		auth=open("auth.txt", "r")
-		line=auth.readline()
-		print line
-		auth.close()	
-		uid, pwd=line.split(":", 1)
-		print uid
-		print pwd
-		params = urllib.urlencode({uid: pwd})	
-		#params = urllib.urlencode({self.uid: self.pwd})
+		params = urllib.urlencode({self.uid: self.pwd})
 		print params
 		headers = {"Content-type": "appication/x-www-form-urlencoded", "Accept": "text/plain"}
-		conn = httplib.HTTPConnection(self.ip, 8080)
+		conn = httplib.HTTPConnection("localhost", 8080)
 		conn.request("POST","/getPolicy",params ,headers)
 		response=conn.getresponse()
 		print "...................AFTER TAKING RESPONCE........................."
@@ -93,7 +85,7 @@ class Admin():
 		print "...................IN GETAPPS................................"
 		params = urllib.urlencode({self.uid: self.pwd})
 		headers = {"Content-type": "appication/x-www-form-urlencoded", "Accept": "text/plain"}
-		conn = httplib.HTTPConnection(self.ip, 8080)
+		conn = httplib.HTTPConnection("localhost", 8080)
 		conn.request("POST","/getApps",params ,headers)
 		response=conn.getresponse()
 			
