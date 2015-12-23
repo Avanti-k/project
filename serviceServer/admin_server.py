@@ -26,10 +26,7 @@ public_key1=keys1.publickey()
 file=open("keys_server.txt","w+")
 file.write(public_key1.exportKey())
 file.close()
-<<<<<<< HEAD
-=======
 
->>>>>>> 89709646a2bc2b884c17ca9aea89380d430f891e
 @bottle.post('/newNode')
 def insert_entry():
 	postdata = request.body.read()
@@ -95,24 +92,17 @@ def do_login():
 	print "in login"
 	#reading encrypted data from client 
 	postdata=request.body.read()
-<<<<<<< HEAD
+
 	print "postdata: "+postdata
-	uid,enc_pwd=postdata.split("=",1)
-	print enc_pwd
+	uid,pwd=postdata.split("=",1)
+	print pwd
 	print uid
-=======
-	enc_pwd="ass"
-	uid="132"
-	#uid,enc_pwd=postdata.split("=",1)
-	print postdata
->>>>>>> 89709646a2bc2b884c17ca9aea89380d430f891e
+
+
 	#decrypting pwd
 	#pwd=keys1.decrypt(literal_eval(enc_pwd))
 	#pwd=keys1.decrypt(enc_pwd)
-	print "dec_pwd "
-	pwd="pwdcoco2pune7"
-	print pwd
-	print uid+" "+pwd
+	#print "dec_pwd "
 	cnx=mysql.connector.connect(user="ideate",password='password',database='one')
     	cursor=cnx.cursor()
 	cursor.execute("select uid,pwd from data where uid="+uid+" and pwd='"+pwd+"'")
@@ -125,19 +115,15 @@ def do_login():
 		return "0"
 @bottle.post('/getPolicy')
 def give_policy():
-<<<<<<< HEAD
-	print "...................IN GETPOLICY........................."
 	postdata=request.body.read()
 	print "postdata:"+postdata
 	uid,pwd=postdata.split("=",1)
-=======
 	print "-------IN GIVE_POLICY-----------"
 	postdata=request.body.read()
 	print "postdata"
 	print postdata
 	uid="123"
 	#uid,pwd=postdata.split("=",1)
->>>>>>> 89709646a2bc2b884c17ca9aea89380d430f891e
 	filename=uid+"_policy.txt"
 	if os.path.isfile(filename): 
 		policy_server=open(filename, "r")		
@@ -156,21 +142,12 @@ def give_policy():
 		return jdata
 
 @bottle.post('/getApps')
-<<<<<<< HEAD
-def give_Apps():
-	postdata=request.body.read()
-	uid,pwd=postdata.split("=",1)
-=======
 def give_apps():
 	print "-------IN GIVE_APPS-----------"
 	postdata=request.body.read()
-	#uid,pwd=postdata.split("=",1)
-	uid="123"
-	print "printing postdata"
+	uid,pwd=postdata.split("=",1)
 	print postdata
-	#ava- when adn where is this file getting created
 	#filename=uid+"_apps.txt"
->>>>>>> 89709646a2bc2b884c17ca9aea89380d430f891e
 	filename="client1_apps.txt"
 	if os.path.isfile(filename): 
 		policy_server=open(filename, "r")		
@@ -178,6 +155,8 @@ def give_apps():
 		json_line = json.loads(line)
 		jdata = json.dumps({"appid":json_line['appid'],"server_loc":json_line['server_loc']})
 		policy_server.close()	
+		print"printing jdata"
+		print jdata
 		return jdata
 			
 	else:

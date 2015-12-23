@@ -1,6 +1,5 @@
 #********service client************#
 # REMAINING- 1)msg too large error
-#		2) reading json ob from file
 #this is the administrative daemon communicating with the service server
 #1. initializes comm with the server(login or registration)
 #2. maintain policy, app list as variables
@@ -22,8 +21,8 @@ from subprocess import Popen, check_output
 class Admin():
 
 	t=0	# time to get new policy
-	uid="148"	#extract from auth.txt, get from server
-	pwd="148p"	#extract from auth.txt, get from server
+	uid=""	#extract from auth.txt, get from server
+	pwd=""	#extract from auth.txt, get from server
 	apps=[]	#list of apps, appid:serverip
 	ip=""	#extract from server.txt
 	app_handle=[]	#just in case
@@ -52,11 +51,16 @@ class Admin():
 			key, val=line.split(":", 1)
 			if key=="uname":
 				params[0]=val
+				
+				
 			elif key=="loc":
 				params[1]=val
+		
 		info.close()
 		self.uname=params[0]
 		self.loc=params[1]
+		print self.uname
+		print self.loc
 
 	def setParams(self,params):
 		return
@@ -93,6 +97,7 @@ class Admin():
 		print response.status, response.reason
 		st=response.read()
 		print st
+		print "printing st"
 		if st!="0":
 			app_list=open("app_list.txt", "w")
 			app_list.write(st)
@@ -109,31 +114,26 @@ class Admin():
 		
 		#login
 		if path.isfile("auth.txt"): 
-			# read json object form auth-> kshitish
-			#auth=open("auth.txt", "r")
-			#line=auth.read()	
-			#self.uid=line['uid']
-			#self.pwd=line['pwd']
+			print "in login"
 			
-
-
-			#self.uid=120
-			#self.pwd="pwdcocomum"
-					
-
-
-
+			auth=open("auth.txt","r")
+			line=auth.read();
+			json_obj = json.loads(line)
+			self.uid=json_obj['uid']
+			self.pwd=json_obj['pwd']
+			print "uid : "+ self.uid
+			print "pwd : "+ self.pwd
 			# add encryption to send pwd to server
-			file=open("../../serviceServer/keys_server.txt","r")
-			public_str=file.read()
-			file.close()
-			public_key=RSA.importKey(public_str)
-			enc_data=public_key.encrypt(self.pwd, 32)
-
-			params = urllib.urlencode({self.uid:enc_data})
+			#file=open("../../serviceServer/keys_server.txt","r")
+			#public_str=file.read()
+			#file.close()
+			#public_key=RSA.importKey(public_str)
+			#enc_data=public_key.encrypt(self.pwd, 32)
+			
+			params = urllib.urlencode({self.uid:self.pwd})
 			print params
 			headers = {"Content-type": "appication/x-www-form-urlencoded", "Accept": "text/plain"}
-			conn = httplib.HTTPConnection(self.ip, 8080)
+			conn = httplib.HTTPConnection("localhost", 8080)
 			conn.request("POST","/login",params ,headers)
 			response=conn.getresponse()
 			
